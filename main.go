@@ -61,6 +61,7 @@ func EmbedSubtitles(videoFilename string, srtFilename string, outputVideoFilenam
 
 	cmd := exec.Command(
 		"ffmpeg",
+		"-y",                // Force overwrite output file without asking
 		"-i", videoFilename, // Input video file
 		"-vf", fmt.Sprintf("subtitles=%s:force_style='%s'", srtFilename, subtitleOptions), // Input subtitle file with styling
 		"-c:a", "copy", // Copy audio stream without re-encoding
