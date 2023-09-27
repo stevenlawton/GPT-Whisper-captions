@@ -69,7 +69,17 @@ func EmbedSubtitles(videoFilename string, srtFilename string, outputVideoFilenam
 		"-preset", "fast", // Preset for speed/quality trade-off
 		outputVideoFilename, // Output video file
 	)
-	return cmd.Run()
+
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
+	if err != nil {
+		// Capture the standard error output from the command
+		return fmt.Errorf("ffmpeg error: %w, stderr: %s", err, stderr.String())
+	}
+
+	return nil
 }
 
 // SendToWhisper Sends the audio file to OpenAI's Whisper API
