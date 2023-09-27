@@ -142,7 +142,7 @@ func main() {
 	audioFilename := "output_audio.mp3"
 	srtFilename := "output.srt"
 	outputVideoFilename := "video_with_subtitles.mp4"
-	apiKey := "OPEN-AI-API-KEY"
+	apiKey := "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"
 	segmentLength := 5
 
 	// Step 1: Extract Audio
