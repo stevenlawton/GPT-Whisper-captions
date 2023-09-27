@@ -1,13 +1,12 @@
-package main
+package GPTWhisperCaptions
 
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/joho/godotenv"
 	"io"
 	"io/ioutil"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -24,8 +23,18 @@ type TimedText struct {
 	Text  string  // the transcribed text
 }
 
-// Extracts audio from a video file using FFmpeg
-func extractAudio(videoFilename string, audioFilename string) error {
+// CheckFFmpegInstallation checks if FFmpeg is installed on the system
+func CheckFFmpegInstallation() error {
+	cmd := exec.Command("ffmpeg", "-version")
+	err := cmd.Run()
+	if err != nil {
+		return errors.New("FFmpeg is not installed on this system")
+	}
+	return nil
+}
+
+// ExtractAudio Extracts audio from a video file using FFmpeg
+func ExtractAudio(videoFilename string, audioFilename string) error {
 	cmd := exec.Command("ffmpeg", "-i", videoFilename, "-q:a", "0", "-map", "a", audioFilename, "-y")
 	err := cmd.Run()
 	if err != nil {
@@ -34,7 +43,7 @@ func extractAudio(videoFilename string, audioFilename string) error {
 	return nil
 }
 
-func segmentAudio(audioFilename string, segmentLength int) error {
+func SegmentAudio(audioFilename string, segmentLength int) error {
 	cmd := exec.Command(
 		"ffmpeg",
 		"-i", audioFilename, // Input file
@@ -46,8 +55,9 @@ func segmentAudio(audioFilename string, segmentLength int) error {
 	return cmd.Run()
 }
 
-func embedSubtitles(videoFilename string, srtFilename string, outputVideoFilename string) error {
+func EmbedSubtitles(videoFilename string, srtFilename string, outputVideoFilename string) error {
 	subtitleOptions := "FontName=Arial:FontSize=16:Fontcolor=white:Box=1:Boxcolor=black@0.5"
+	//netflixStyleSubtitleOptions := "Fontname=Consolas,BackColour=&H80000000,Spacing=0.2,Outline=0,Shadow=0.75"
 
 	cmd := exec.Command(
 		"ffmpeg",
@@ -62,8 +72,8 @@ func embedSubtitles(videoFilename string, srtFilename string, outputVideoFilenam
 	return cmd.Run()
 }
 
-// Sends the audio file to OpenAI's Whisper API
-func sendToWhisper(audioFilename string, apiKey string) (string, error) {
+// SendToWhisper Sends the audio file to OpenAI's Whisper API
+func SendToWhisper(audioFilename string, apiKey string) (string, error) {
 	// Create a buffer to hold the form data
 	var b bytes.Buffer
 	w := multipart.NewWriter(&b)
@@ -114,7 +124,7 @@ func sendToWhisper(audioFilename string, apiKey string) (string, error) {
 	}
 
 	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("Whisper API returned non-200 status code: %s", respBytes)
+		return "", fmt.Errorf("openai whisper API returned non-200 status code: %s", respBytes)
 	}
 
 	// Unmarshal JSON into a Go struct
@@ -126,7 +136,7 @@ func sendToWhisper(audioFilename string, apiKey string) (string, error) {
 	return transcriptionResponse.Text, nil
 }
 
-func generateSRT(timedTexts []TimedText, srtFilename string) error {
+func GenerateSRT(timedTexts []TimedText, srtFilename string) error {
 	var srtContent string
 	for i, tt := range timedTexts {
 		start := fmt.Sprintf("%02d:%02d:%02d,000",
@@ -137,64 +147,4 @@ func generateSRT(timedTexts []TimedText, srtFilename string) error {
 	}
 
 	return ioutil.WriteFile(srtFilename, []byte(srtContent), 0644)
-}
-
-func main() {
-	// Load .env file
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	apiKey := os.Getenv("API_KEY")
-	videoFilename := "input_video.mp4"
-	audioFilename := "output_audio.mp3"
-	srtFilename := "output.srt"
-	outputVideoFilename := "video_with_subtitles.mp4"
-	segmentLength := 5
-
-	// Step 1: Extract Audio
-	if err := extractAudio(videoFilename, audioFilename); err != nil {
-		fmt.Println("Error extracting audio:", err)
-		return
-	}
-
-	// Step 2: Segment Audio
-	if err := segmentAudio(audioFilename, segmentLength); err != nil {
-		fmt.Println("Error segmenting audio:", err)
-		return
-	}
-
-	// Step 3: Transcribe Each Segment
-	var timedTexts []TimedText
-	for i := 0; ; i++ {
-		segmentFilename := fmt.Sprintf("segment_%03d.mp3", i)
-		if _, err := os.Stat(segmentFilename); os.IsNotExist(err) {
-			break // No more segments
-		}
-		transcript, err := sendToWhisper(segmentFilename, apiKey)
-		if err != nil {
-			fmt.Println("Error sending to Whisper:", err)
-			return
-		}
-		startTime := float64(i * segmentLength)
-		endTime := startTime + float64(segmentLength)
-		timedTexts = append(timedTexts, TimedText{Start: startTime, End: endTime, Text: transcript})
-	}
-
-	// Step 4: Generate SRT
-	if err := generateSRT(timedTexts, srtFilename); err != nil {
-		fmt.Println("Error generating SRT:", err)
-		return
-	}
-
-	fmt.Println("Subtitles generated.")
-
-	// Step 5: Embed Subtitles
-	if err := embedSubtitles(videoFilename, srtFilename, outputVideoFilename); err != nil {
-		fmt.Println("Error embedding subtitles:", err)
-		return
-	}
-
-	fmt.Println("Subtitles embedded.")
 }

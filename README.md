@@ -1,48 +1,42 @@
-# Video Subtitler with Whisper API
+# GPT-Whisper-Captions
 
-## Overview
+## Description
 
-This is a Go-based application that automates the process of generating subtitles for a given video file. It leverages OpenAI's Whisper ASR API for speech recognition.
-
-## Features
-
-- Extracts audio from video files.
-- Segments the audio for more manageable processing.
-- Transcribes the audio segments using OpenAI's Whisper ASR API.
-- Generates an SRT subtitle file from the transcriptions.
-- Embeds the SRT subtitles back into the video.
-
-## Requirements
-
-- Go 1.x.x
-- FFmpeg installed and available in your PATH
-- An OpenAI API key for Whisper
+This repository contains a Go module for video transcription using OpenAI's Whisper API. It allows you to extract audio from a video file, send it to the Whisper API for transcription, and then embed the transcribed text back into the video as subtitles.
 
 ## Installation
 
-1. Clone this repository:
+1. Make sure you have Go installed on your system. If not, you can download and install it from [here](https://golang.org/dl/).
 
+2. Clone this repository:
     ```bash
     git clone https://github.com/stevenlawton/GPT-Whisper-captions.git
     ```
 
-2. Navigate to the project directory:
-
+3. Navigate to the project folder and install the dependencies:
     ```bash
     cd GPT-Whisper-captions
+    go mod download
     ```
 
-3. Install dependencies (if any):
-
-    ```bash
-    go get -u ./...
-    ```
+4. Make sure FFmpeg is installed on your system. If not, you can download it from [here](https://ffmpeg.org/download.html).
 
 ## Usage
 
-### Configuration
 
-Copy `.env.example` to `.env` and add your OpenAI API key.
+## Features
 
-```bash
-cp .env.example .env
+- Audio extraction from video using FFmpeg
+- Audio segmentation for more manageable transcription
+- Transcription using OpenAI's Whisper API
+- SRT file generation for subtitles
+- Embedding subtitles back into the video
+
+## Contributing
+
+Feel free to open issues or submit pull requests. Your contributions are welcome!
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+
