@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/joho/godotenv"
 	"io"
 	"io/ioutil"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -138,11 +140,17 @@ func generateSRT(timedTexts []TimedText, srtFilename string) error {
 }
 
 func main() {
+	// Load .env file
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	apiKey := os.Getenv("API_KEY")
 	videoFilename := "input_video.mp4"
 	audioFilename := "output_audio.mp3"
 	srtFilename := "output.srt"
 	outputVideoFilename := "video_with_subtitles.mp4"
-	apiKey := "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"
 	segmentLength := 5
 
 	// Step 1: Extract Audio
