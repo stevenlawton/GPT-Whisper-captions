@@ -1,8 +1,6 @@
 package GPTWhisperCaptions
 
 import (
-	"github.com/joho/godotenv"
-	"os"
 	"testing"
 )
 
@@ -40,13 +38,7 @@ func TestGenerateSRT(t *testing.T) {
 }
 
 func TestSendToWhisper(t *testing.T) {
-	// Assuming API_KEY exists in your .env file
-	err := godotenv.Load(".env")
-	if err != nil {
-		t.Fatal("Error loading .env file")
-	}
-
-	apiKey := os.Getenv("API_KEY")
+	apiKey := ""
 
 	text, err := SendToWhisper("test_segment.mp3", apiKey)
 	if err != nil {
