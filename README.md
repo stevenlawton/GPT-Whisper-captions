@@ -8,22 +8,36 @@ This repository contains a Go module for video transcription using OpenAI's Whis
 
 1. Make sure you have Go installed on your system. If not, you can download and install it from [here](https://golang.org/dl/).
 
-2. Clone this repository:
-    ```bash
-    git clone https://github.com/stevenlawton/GPT-Whisper-captions.git
-    ```
+2. Make sure FFmpeg is installed on your system. If not, you can download it from [here](https://ffmpeg.org/download.html).
 
-3. Navigate to the project folder and install the dependencies:
-    ```bash
-    cd GPT-Whisper-captions
-    go mod download
-    ```
-
-4. Make sure FFmpeg is installed on your system. If not, you can download it from [here](https://ffmpeg.org/download.html).
+As a library
+```bash
+go get github.com/stevenlawton/GPT-Whisper-captions
+```
 
 ## Usage
+In your Go app you can do something like
 
+```go
+package main
 
+import (
+    "log"
+    "os"
+
+    captions "github.com/stevenlawton/GPT-Whisper-captions"
+)
+
+func main() {
+   // Check if FFmpeg is installed
+   err = captions.CheckFFmpegInstallation()
+   if err != nil {
+      log.Fatal("FFmpeg is not installed: ", err)
+      return
+   }
+
+}
+```
 ## Features
 
 - Audio extraction from video using FFmpeg
