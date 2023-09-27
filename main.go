@@ -56,20 +56,22 @@ func SegmentAudio(audioFilename string, segmentLength int) error {
 }
 
 func EmbedSubtitles(videoFilename string, srtFilename string, outputVideoFilename string) error {
-	subtitleOptions := "FontName=Arial:FontSize=16:Fontcolor=white:Box=1:Boxcolor=black@0.5"
-	//netflixStyleSubtitleOptions := "Fontname=Consolas,BackColour=&H80000000,Spacing=0.2,Outline=0,Shadow=0.75"
+	//subtitleOptions := "FontName=Arial:FontSize=16:Fontcolor=white:Box=1:Boxcolor=black@0.5"
+	subtitleOptions := "Fontname=Consolas,BackColour=&H80000000,Spacing=0.2,Outline=0,Shadow=0.75"
 
 	cmd := exec.Command(
 		"ffmpeg",
 		"-y",                // Force overwrite output file without asking
 		"-i", videoFilename, // Input video file
-		"-vf", fmt.Sprintf("subtitles=%s:force_style='%s'", srtFilename, subtitleOptions), // Input subtitle file with styling
+		"-vf", fmt.Sprintf("subtitles=%s:force_style='%s'", srtFilename, subtitleOptions),
 		"-c:a", "copy", // Copy audio stream without re-encoding
 		"-c:v", "libx264", // Video codec to use
 		"-crf", "23", // Constant rate factor for video quality
 		"-preset", "fast", // Preset for speed/quality trade-off
 		outputVideoFilename, // Output video file
 	)
+
+	fmt.Println(cmd.String())
 
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
